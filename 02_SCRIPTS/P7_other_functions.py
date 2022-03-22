@@ -10,7 +10,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
 from sklearn.metrics import fbeta_score
+from sklearn.preprocessing import MinMaxScaler
 import time
+import gc
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -20,11 +22,6 @@ class TrainTestGrid:
     gridsearch the best parameters and display the results of the method chosen
     """
     def __init__(self, x, y, method='knn', n_esti=None):
-        self.x = x
-        self.y = y
-        self.method = method
-        self.n_esti = n_esti
-
         # Classification parameters and train test sets
         self.params = None
         self.mthd = None
@@ -37,6 +34,14 @@ class TrainTestGrid:
         # Classification results
         self.fbeta_score_ = None
 
+        # input to preprocess
+        self.x = None
+
+        self.preprocess_x(x)
+        self.y = y
+        self.method = method
+        self.n_esti = n_esti
+
         self.set_params()
         self.tt_split()
         self.grid()
@@ -47,6 +52,13 @@ class TrainTestGrid:
             self.fit_and_pred()
 
         return
+
+    def preprocess_x(self, x):
+        """
+        preprocess data before splitting
+        """
+        scaler = MinMaxScaler()
+        self.x = scaler.fit_transform(x)
 
     def set_params(self):
         """
@@ -72,11 +84,13 @@ class TrainTestGrid:
         knn parameters and method
         """
         params = {
-            'n_neighbors': list(range(15, 30)),
+            'n_neighbors': list(range(10, 30)),
             'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
         }
         self.params = params
         self.mthd = KNeighborsClassifier()
+        del params
+        gc.collect()
 
     def svc_params(self):
         """
@@ -88,6 +102,8 @@ class TrainTestGrid:
         }
         self.params = params
         self.mthd = LinearSVC(random_state=0, max_iter=2000, tol=0.0001)
+        del params
+        gc.collect()
 
     def sgd_params(self):
         """
@@ -99,6 +115,8 @@ class TrainTestGrid:
         }
         self.params = params
         self.mthd = SGDClassifier(random_state=0)
+        del params
+        gc.collect()
 
     def rfc_params(self):
         """
@@ -109,6 +127,8 @@ class TrainTestGrid:
         }
         self.params = params
         self.mthd = RandomForestClassifier(random_state=0)
+        del params
+        gc.collect()
 
     def tt_split(self):
         """
@@ -131,6 +151,8 @@ class TrainTestGrid:
             print('Grid best params :', grid.best_params_)
 
             self.cls = self.mthd.set_params(**grid.best_params_)
+            del grid
+            gc.collect()
 
     def fit_and_pred(self):
         """
@@ -152,6 +174,8 @@ class TrainTestGrid:
             self.fbeta_score_)
         )
         plt.show()
+        del train_time, pred, true
+        gc.collect()
 
     def bagged_fit_and_pred(self):
         """
@@ -190,6 +214,8 @@ class TrainTestGrid:
             self.fbeta_score_[1])
         )
         plt.show()
+        del train_time, pred, true, fig, ax, pred_bag
+        gc.collect()
 
 
 def heatmap_print(true, pred, title):
@@ -217,3 +243,4 @@ def classify_with_proba(probability_pred, proba_0=0.5):
         return 0
     else:
         return 1
+

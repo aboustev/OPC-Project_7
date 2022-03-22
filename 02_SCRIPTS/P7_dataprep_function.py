@@ -410,16 +410,17 @@ def adjust_string(string):
     return string
 
 
-def main(test_importance=False):
+def main(test_importance=False, nrows=None):
     """
     Main function for data import
     :param test_importance:
+    :param nrows:
     :return:
     """
     if test_importance:
-        num_rows = 10000
+        num_rows = nrows
     else:
-        num_rows = None
+        num_rows = nrows
     df = application_train_test(num_rows)
     with timer("Process bureau and bureau_balance"):
         bureau = bureau_and_balance(num_rows)
@@ -462,4 +463,4 @@ def main(test_importance=False):
 
 
 if __name__ == '__main__':
-    feat_importance, top_feat, df = main(test_importance=True)
+    feat_importance, top_feat, df_ = main(test_importance=True)
