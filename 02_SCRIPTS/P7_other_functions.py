@@ -9,21 +9,39 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
-from sklearn.metrics import fbeta_score, f1_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import fbeta_score, f1_score, precision_score
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import KNNImputer
 import time
 import gc
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from lightgbm import LGBMClassifier
 from imblearn.over_sampling import SMOTE
 
+path_to_scripts = r'..\02_SCRIPTS'
+sys.path.insert(0, path_to_scripts)
+from P7_dataprep_function import main
+
+
+def preprocess_x(x):
+    """
+    preprocess data before splitting
+    """
+    scaler = MinMaxScaler()
+    scaled_df = scaler.fit_transform(x)
+    df_out = pd.DataFrame(scaled_df, columns=x.columns)
+    return df_out
+
 
 class TrainTestGrid:
     """
     gridsearch the best parameters and display the results of the method chosen
     """
+
     def __init__(self, df, topfeat, prepro_mthd=None, method='knn', n_esti=None):
         # Classification parameters and train test sets
         self.params = None
@@ -45,13 +63,18 @@ class TrainTestGrid:
         self.topfeat = topfeat
         self.prepro_mthd = prepro_mthd
         self.y = None
+        self.x = None
 
         # Min max scaler on original dataset only
-        self.x_ori = self.preprocess_x(self.df[self.topfeat])
+        self.x_ori = preprocess_x(self.df[self.topfeat])
         self.y_ori = self.df.TARGET
 
         self.resampling()
-        self.preprocess_x(self.x)
+        self.adjust_nan()
+        if self.x is None:
+            print('None x input')
+        else:
+            self.x = preprocess_x(self.x)
         self.method = method
         self.n_esti = n_esti
 
@@ -66,7 +89,14 @@ class TrainTestGrid:
 
         return
 
+    def adjust_nan(self):
+        imputer = KNNImputer(n_neighbors=2)
+        self.x = pd.DataFrame(imputer.fit_transform(self.x), columns=[self.topfeat])
+
     def resampling(self):
+        """
+        function for resampling
+        """
         if self.prepro_mthd == "under":
             self.undersamp()
         elif self.prepro_mthd == "over":
@@ -78,6 +108,9 @@ class TrainTestGrid:
             self.y = self.df['TARGET']
 
     def undersamp(self):
+        """
+        function of undersampling
+        """
         class_count_0, class_count_1 = self.df['TARGET'].value_counts()
         class_0 = self.df[self.df['TARGET'] == 0]
         class_1 = self.df[self.df['TARGET'] == 1]
@@ -87,6 +120,9 @@ class TrainTestGrid:
         self.y = df_samp['TARGET']
 
     def oversamp(self):
+        """
+        function of oversampling
+        """
         class_count_0, class_count_1 = self.df['TARGET'].value_counts()
         class_0 = self.df[self.df['TARGET'] == 0]
         class_1 = self.df[self.df['TARGET'] == 1]
@@ -96,16 +132,12 @@ class TrainTestGrid:
         self.y = df_samp['TARGET']
 
     def smotesamp(self):
+        """
+        function for smote
+        """
         smote = SMOTE()
         # fit predictor and target variable
         self.x, self.y = smote.fit_resample(self.df[self.topfeat], self.df.TARGET)
-
-    def preprocess_x(self, x):
-        """
-        preprocess data before splitting
-        """
-        scaler = MinMaxScaler()
-        return scaler.fit_transform(x)
 
     def set_params(self):
         """
@@ -122,11 +154,13 @@ class TrainTestGrid:
             self.rfc_params()
         elif self.method == 'lgbm':
             self.lgbm_params()
+        elif self.method == 'lreg':
+            self.lreg_params()
         elif self.method == 'dummy':
             self.cls = DummyClassifier(random_state=0)
         else:
             print('Wrong method input, please make sure you \
-                entered either ["knn", "svc", "sgd", "rfc", "lgbm", "dummy"]')
+                entered either ["knn", "svc", "sgd", "rfc", "lgbm", "lreg", "dummy"]')
             return
 
     def knn_params(self):
@@ -165,6 +199,19 @@ class TrainTestGrid:
         }
         self.params = params
         self.mthd = SGDClassifier(random_state=0)
+        del params
+        gc.collect()
+
+    def lreg_params(self):
+        """
+        Logistic regression parameters and method
+        """
+        params = {
+            'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+            'max_iter': [200, 300, 400]
+        }
+        self.params = params
+        self.mthd = LogisticRegression(random_state=0)
         del params
         gc.collect()
 
@@ -233,17 +280,19 @@ class TrainTestGrid:
         train_time = time.time() - start_train_time
         print('{} train time : {}'.format(self.method.upper(), train_time))
 
-        pred = self.cls.predict(self.X_test)
-        true = self.y_test.values
+        pred = self.cls.predict(self.x_ori)
+        true = self.y_ori.values
         self.fbeta_score_ = fbeta_score(true, pred, beta=0.5)
         self.f_measure = f1_score(true, pred)
+        self.precision = precision_score(true, pred)
         plt.figure(figsize=(10, 5))
         sns.heatmap(confusion_matrix(true, pred), annot=True, cmap="Blues")
-        plt.title('{} confusion matrix \n score = {} \n fbeta score = {} \n f1 score = {}'.format(
+        plt.title('{} confusion matrix\nscore = {}\nfbeta score = {}\nf1 score = {}\nprecision = {}'.format(
             self.method.upper(),
             self.cls.score(self.X_test, self.y_test),
             self.fbeta_score_,
-            self.f_measure)
+            self.f_measure,
+            self.precision)
         )
         plt.show()
         del train_time, pred, true
@@ -264,28 +313,32 @@ class TrainTestGrid:
         train_time = time.time() - start_train_time
         print('{} train time : {}'.format(self.method.upper(), train_time))
 
-        pred = self.cls.predict(self.X_test)
-        pred_bag = bagged_cls.predict(self.X_test)
-        true = self.y_test.values
+        pred = self.cls.predict(self.x_ori)
+        pred_bag = bagged_cls.predict(self.x_ori)
+        true = self.y_ori.values
 
         self.fbeta_score_ = [fbeta_score(true, pred_bag, beta=0.5), fbeta_score(true, pred, beta=0.5)]
         self.f_measure = [f1_score(true, pred_bag), f1_score(true, pred)]
+        self.precision = [precision_score(true, pred_bag), precision_score(true, pred)]
         fig, ax = plt.subplots(ncols=2, figsize=(20, 5))
 
         sns.heatmap(confusion_matrix(true, pred_bag), annot=True, cmap="Blues", ax=ax[0])
-        ax[0].set_title('bagged {} confusion matrix \n score = {} \n fbeta score = {} \n f1 score = {}'.format(
-            self.method.upper(),
-            bagged_cls.score(self.X_test, self.y_test),
-            self.fbeta_score_[0],
-            self.f_measure[0])
+        ax[0].set_title(
+            'Bagged {} confusion matrix\nscore = {}\nfbeta score = {}\nf1 score = {}\nprecision = {}'.format(
+                self.method.upper(),
+                bagged_cls.score(self.X_test, self.y_test),
+                self.fbeta_score_[0],
+                self.f_measure[0],
+                self.precision[0])
         )
 
         sns.heatmap(confusion_matrix(true, pred), annot=True, cmap="Blues", ax=ax[1])
-        ax[1].set_title('{} confusion matrix \n score = {} \n fbeta score = {} \n f1 score = {}'.format(
+        ax[1].set_title('{} confusion matrix\nscore = {}\nfbeta score = {}\nf1 score = {}\nprecision = {}'.format(
             self.method.upper(),
             self.cls.score(self.X_test, self.y_test),
             self.fbeta_score_[1],
-            self.f_measure[1])
+            self.f_measure[1],
+            self.precision[1])
         )
         plt.show()
         del train_time, pred, true, fig, ax, pred_bag
@@ -318,3 +371,40 @@ def classify_with_proba(probability_pred, proba_0=0.5):
     else:
         return 1
 
+
+if __name__ == '__main__':
+    df = main(nrows=100000)
+    top_feat = ['AMT_ANNUITY',
+                'AMT_CREDIT',
+                'AMT_INCOME_TOTAL',
+                'AMT_REQ_CREDIT_BUREAU_QRT',
+                'AMT_REQ_CREDIT_BUREAU_YEAR',
+                'ANNUITY_INCOME_PERC',
+                'APARTMENTS_AVG',
+                'BASEMENTAREA_AVG',
+                'COMMONAREA_MEDI',
+                'DAYS_BIRTH',
+                'DAYS_EMPLOYED',
+                'DAYS_ID_PUBLISH',
+                'DAYS_LAST_PHONE_CHANGE',
+                'DAYS_REGISTRATION',
+                'EXT_SOURCE_1',
+                'EXT_SOURCE_2',
+                'EXT_SOURCE_3',
+                'HOUR_APPR_PROCESS_START',
+                'INCOME_CREDIT_PERC',
+                'INCOME_PER_PERSON',
+                'LANDAREA_AVG',
+                'LIVINGAREA_MODE',
+                'NONLIVINGAREA_AVG',
+                'OBS_30_CNT_SOCIAL_CIRCLE',
+                'OWN_CAR_AGE',
+                'PAYMENT_RATE',
+                'REGION_POPULATION_RELATIVE',
+                'TOTALAREA_MODE',
+                'YEARS_BEGINEXPLUATATION_AVG',
+                'YEARS_BEGINEXPLUATATION_MODE']
+    df_modele = df[top_feat + ['TARGET']]
+    df_modele_train = df_modele[df_modele['TARGET'].notnull()]
+    df_modele_test = df_modele[df_modele['TARGET'].isnull()]
+    under_lreg_results = TrainTestGrid(df_modele_train, top_feat, prepro_mthd="under", method='lreg')

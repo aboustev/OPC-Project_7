@@ -5,3 +5,6 @@ lightgbm
 sklearn
 matplotlib
 seaborn
+joblib
+imblearn
+flask
