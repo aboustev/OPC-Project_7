@@ -70,7 +70,6 @@ class TrainTestGrid:
         self.y_ori = self.df.TARGET
 
         self.resampling()
-        self.adjust_nan()
         if self.x is None:
             print('None x input')
         else:
@@ -88,10 +87,6 @@ class TrainTestGrid:
             self.fit_and_pred()
 
         return
-
-    def adjust_nan(self):
-        imputer = KNNImputer(n_neighbors=2)
-        self.x = pd.DataFrame(imputer.fit_transform(self.x), columns=[self.topfeat])
 
     def resampling(self):
         """
@@ -370,41 +365,3 @@ def classify_with_proba(probability_pred, proba_0=0.5):
         return 0
     else:
         return 1
-
-
-if __name__ == '__main__':
-    df = main(nrows=100000)
-    top_feat = ['AMT_ANNUITY',
-                'AMT_CREDIT',
-                'AMT_INCOME_TOTAL',
-                'AMT_REQ_CREDIT_BUREAU_QRT',
-                'AMT_REQ_CREDIT_BUREAU_YEAR',
-                'ANNUITY_INCOME_PERC',
-                'APARTMENTS_AVG',
-                'BASEMENTAREA_AVG',
-                'COMMONAREA_MEDI',
-                'DAYS_BIRTH',
-                'DAYS_EMPLOYED',
-                'DAYS_ID_PUBLISH',
-                'DAYS_LAST_PHONE_CHANGE',
-                'DAYS_REGISTRATION',
-                'EXT_SOURCE_1',
-                'EXT_SOURCE_2',
-                'EXT_SOURCE_3',
-                'HOUR_APPR_PROCESS_START',
-                'INCOME_CREDIT_PERC',
-                'INCOME_PER_PERSON',
-                'LANDAREA_AVG',
-                'LIVINGAREA_MODE',
-                'NONLIVINGAREA_AVG',
-                'OBS_30_CNT_SOCIAL_CIRCLE',
-                'OWN_CAR_AGE',
-                'PAYMENT_RATE',
-                'REGION_POPULATION_RELATIVE',
-                'TOTALAREA_MODE',
-                'YEARS_BEGINEXPLUATATION_AVG',
-                'YEARS_BEGINEXPLUATATION_MODE']
-    df_modele = df[top_feat + ['TARGET']]
-    df_modele_train = df_modele[df_modele['TARGET'].notnull()]
-    df_modele_test = df_modele[df_modele['TARGET'].isnull()]
-    under_lreg_results = TrainTestGrid(df_modele_train, top_feat, prepro_mthd="under", method='lreg')

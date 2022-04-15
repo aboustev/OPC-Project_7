@@ -1,22 +1,20 @@
 """
 The purpose of this python file is to regroup every functions from the external kernel
 """
+import gc
+import os
+import time
+from contextlib import contextmanager
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import gc
-import time
-import matplotlib.pyplot as plt
 import seaborn as sns
-import warnings
-import json
-import os
-import cv2
-import gc
-from contextlib import contextmanager
 from lightgbm import LGBMClassifier
 from lightgbm import log_evaluation
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import KFold, StratifiedKFold
+
 path_to_data = r'..\01_DATA'
 
 
@@ -377,21 +375,21 @@ def display_importances(feature_importance_df_):
     return best_feat
 
 
-def feature_correlation(train, top_feat):
+def feature_correlation(train, top_feature):
     """
     Function to determine the correlation between features
     :param train:
-    :param top_feat:
+    :param top_feature:
     :return:
     """
-    df = train[np.unique(top_feat)]
+    df = train[np.unique(top_feature)]
     corr_matrix = df.corr().abs()
 
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
 
     # Find index of feature columns with correlation greater than 0.95
     high_cor = [column for column in upper.columns if any(upper[column] > 0.95)]
-    features = [i for i in np.unique(top_feat) if i not in high_cor]
+    features = [i for i in np.unique(top_feature) if i not in high_cor]
     return features
 
 
@@ -455,9 +453,9 @@ def main(test_importance=False, nrows=None):
     if test_importance:
         with timer("Run LightGBM with kfold"):
             df.columns = [adjust_string(strg) for strg in df.columns]
-            feat_importance, top_feat = kfold_lightgbm(df, num_folds=10)
+            feature_imp, topfeat = kfold_lightgbm(df, num_folds=10)
 
-        return feat_importance, top_feat, df
+        return feature_imp, topfeat, df
     else:
         return df
 
