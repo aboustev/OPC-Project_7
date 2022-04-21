@@ -1,6 +1,6 @@
 pandas
 numpy
-contextlib
+contextlib3
 lightgbm
 sklearn
 matplotlib
@@ -8,3 +8,5 @@ seaborn
 joblib
 imblearn
 flask
+plotly
+streamlit

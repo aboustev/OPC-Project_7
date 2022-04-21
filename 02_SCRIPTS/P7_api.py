@@ -4,12 +4,8 @@ The purpose of this python file is to regroup every functions from the external 
 import pandas as pd
 import sys
 import joblib
-from flask import Flask, request, render_template
-import plotly
-import plotly.express as px
 import json
-import highcharts
-import plotly.graph_objects as go
+from flask import Flask, request, jsonify
 
 app = Flask(__name__, template_folder=r'..\07_TEMPLATES')
 
@@ -21,50 +17,14 @@ cls = joblib.load(r'..\06_MODEL\final_model.sav')
 imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
 
 
-@app.route('/2')
-def secpage():
-    fig1 = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=10,
-        delta={
-            'reference': 100,
-            'decreasing': {'color': 'red'},
-            'increasing': {'color': 'green'}
-        },
-        domain={'x': [1, 1], 'y': [0, 1]},
-        title={'text': "Speed"}))
-    fig2 = go.Figure(go.Indicator(
-        domain={'x': [1, 1], 'y': [1, 1]},
-        value=450,
-        mode="gauge+number+delta",
-        title={'text': "Speed"},
-        delta={'reference': 380},
-        gauge={'axis': {'range': [None, 500]},
-               'steps': [
-                   {'range': [0, 250], 'color': "lightgray"},
-                   {'range': [250, 400], 'color': "gray"}],
-               'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 490}},
-        bar={'color': 'red'}
-    ))
-    graph_json_1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    graph_json_2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('index.html', plot1=graph_json_1, plot2=graph_json_2)
-
-
 @app.route('/')
 def frontpage():
-    fig1 = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=150,
-        gauge={
-            'axis': {'range': [0, 300]},
-            'bar': {'color': 'red'}
-            },
-        domain={'x': [0, 1], 'y': [0.8, 1]},
-        title={'text': "Speed"}
-    ))
-    graph_json_1 = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('index.html', plot1=graph_json_1)
+    data_granted_loan = all_data[all_data.TARGET.values == 1]
+    columns = all_data.columns[2:]
+    granted_described = data_granted_loan[columns].describe()
+    all_described = all_data[columns].describe()
+    jsonified_list = jsonify([granted_described.to_json(orient='records'), all_described.to_json(orient='records')])
+    return str(type(jsonified_list))
 
 
 @app.route('/api/getdecision/', methods=['GET'])
@@ -86,4 +46,4 @@ def decision():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5000)
