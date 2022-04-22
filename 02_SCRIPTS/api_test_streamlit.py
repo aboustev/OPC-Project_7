@@ -18,24 +18,24 @@ st.set_page_config(
     }
 )
 
-data = pd.read_csv(r'06_MODEL\all_data.csv')
-data_granted_loan = data[data.TARGET.values == 1]
-columns = data.columns[2:]
-granted_described = data_granted_loan[columns].describe()
-all_described = data[columns].describe()
+response = requests.get("http://127.0.0.1:5000/load_data")
+granted_described, all_described = response.json()
+granted_described = pd.read_json(granted_described)
+all_described = pd.read_json(all_described)
+columns = all_described.columns
 
 st.header('Loan visualization')
-
 with st.sidebar:
     number = st.number_input('Client ID',
-                             min_value=data.SK_ID_CURR.min(),
-                             max_value=data.SK_ID_CURR.max(),
+                             value=int(all_described.loc['min', 'SK_ID_CURR']),
+                             min_value=int(all_described.loc['min', 'SK_ID_CURR']),
+                             max_value=int(all_described.loc['max', 'SK_ID_CURR']),
                              step=1)
     response = requests.get("http://127.0.0.1:5000/api/getdecision/?id={}".format(int(number)))
-    st.write(response.json())
+    client_info = pd.DataFrame.from_dict(response.json())                        
 
 col1, col2 = st.columns([20, 20])
-columns = [col for col in columns if col != 'TARGET']
+columns = [col for col in columns if col not in ['SK_ID_CURR', 'TARGET']]
 num = 0
 for col in columns:
     if col == 'AMT_CREDIT':
@@ -45,9 +45,8 @@ for col in columns:
     chart = create_chart(all_described,
                          granted_described,
                          color_list,
-                         col
-                         )
-    chart.update_traces(value=value_from_colline(number, col, data))
+                         col)
+    chart.update_traces(value=client_info.loc['0', col])
     if num % 2 == 0:
         with col1:
             st.plotly_chart(chart, use_container_width=True)

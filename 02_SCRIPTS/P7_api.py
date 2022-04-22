@@ -17,14 +17,20 @@ cls = joblib.load(r'..\06_MODEL\final_model.sav')
 imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
 
 
-@app.route('/')
+@app.route('/load_data')
 def frontpage():
     data_granted_loan = all_data[all_data.TARGET.values == 1]
-    columns = all_data.columns[2:]
+    columns = [col for col in all_data.columns if col != "TARGET"]
     granted_described = data_granted_loan[columns].describe()
     all_described = all_data[columns].describe()
-    jsonified_list = jsonify([granted_described.to_json(orient='records'), all_described.to_json(orient='records')])
-    return str(type(jsonified_list))
+    jsonified_list = jsonify([granted_described.to_json(
+        orient='columns',
+        index=True
+    ), all_described.to_json(
+        orient='columns',
+        index=True
+    )])
+    return jsonified_list
 
 
 @app.route('/api/getdecision/', methods=['GET'])
@@ -42,7 +48,7 @@ def decision():
             data_fitted = pd.DataFrame(data_fitted, columns=cols_without_id)
             prediction = cls.predict(data_fitted[top_feat])
             selected_data.loc[selected_data.index[0], 'TARGET'] = prediction
-    return selected_data.to_json(orient='records')
+    return selected_data.reset_index(drop=True).to_json(orient='columns')
 
 
 if __name__ == '__main__':
