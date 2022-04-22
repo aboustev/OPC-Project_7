@@ -17,12 +17,12 @@ st.set_page_config(
         'About': "# This is a header. This is an *extremely* cool app!"
     }
 )
+host = 'http://127.0.0.1:5000'
 
-host = 'https://share.streamlit.io/aboustev/opc-project_7/main/02_SCRIPTS/P7_api.py'
 try:
     response = requests.get("{}/load_data".format(host))
 except requests.exceptions.ConnectionError:
-    host = 'http://127.0.0.1:5000'
+    host = 'https://share.streamlit.io/aboustev/opc-project_7/main/02_SCRIPTS/flask_back.py'
     response = requests.get("{}/load_data".format(host))
 
 granted_described, all_described = response.json()
