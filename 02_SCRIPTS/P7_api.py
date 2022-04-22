@@ -13,6 +13,8 @@ sys.path.insert(0, r'..\06_MODEL')
 sys.path.insert(0, r'..\07_TEMPLATES')
 
 all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
+if all_data.empty:
+    print('no data')
 cls = joblib.load(r'..\06_MODEL\final_model.sav')
 imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
 
