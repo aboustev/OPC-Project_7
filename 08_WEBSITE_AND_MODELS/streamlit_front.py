@@ -22,7 +22,7 @@ host = 'http://127.0.0.1:5000'
 try:
     response = requests.get("{}/load_data".format(host))
 except requests.exceptions.ConnectionError:
-    host = 'https://share.streamlit.io/aboustev/opc-project_7/main/02_SCRIPTS/flask_back.py'
+    host = 'https://share.streamlit.io/aboustev/opc-project_7/main/08_WEBSITE_AND_MODELS/flask_back.py'
     response = requests.get("{}/load_data".format(host))
 
 granted_described, all_described = response.json()
