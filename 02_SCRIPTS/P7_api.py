@@ -12,9 +12,10 @@ app = Flask(__name__, template_folder=r'..\07_TEMPLATES')
 sys.path.insert(0, r'..\06_MODEL')
 sys.path.insert(0, r'..\07_TEMPLATES')
 
-all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
-if all_data.empty:
-    print('no data')
+try:
+    all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
+except FileNotFoundError:
+    all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv')
 cls = joblib.load(r'..\06_MODEL\final_model.sav')
 imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
 
