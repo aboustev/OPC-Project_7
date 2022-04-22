@@ -16,8 +16,13 @@ try:
     all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
 except FileNotFoundError:
     all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-cls = joblib.load(r'..\06_MODEL\final_model.sav')
-imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
+
+try:
+    cls = joblib.load(r'..\06_MODEL\final_model.sav')
+    imp = joblib.load(r'..\06_MODEL\knn_inputer.sav')
+except FileNotFoundError:
+    cls = joblib.load('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/final_model.sav')
+    imp = joblib.load('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/knn_inputer.sav')
 
 
 @app.route('/load_data')
