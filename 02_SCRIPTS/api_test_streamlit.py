@@ -17,8 +17,14 @@ st.set_page_config(
         'About': "# This is a header. This is an *extremely* cool app!"
     }
 )
+host = 'http://127.0.0.1:5000'
 
-response = requests.get("http://127.0.0.1:5000/load_data")
+try:
+    response = requests.get("{}/load_data".format(host))
+except requests.exceptions.ConnectionError:
+    host = 'https://share.streamlit.io/aboustev/opc-project_7/main/02_SCRIPTS/P7_api.py'
+    response = requests.get("{}/load_data".format(host))
+
 granted_described, all_described = response.json()
 granted_described = pd.read_json(granted_described)
 all_described = pd.read_json(all_described)
@@ -31,7 +37,7 @@ with st.sidebar:
                              min_value=int(all_described.loc['min', 'SK_ID_CURR']),
                              max_value=int(all_described.loc['max', 'SK_ID_CURR']),
                              step=1)
-    response = requests.get("http://127.0.0.1:5000/api/getdecision/?id={}".format(int(number)))
+    response = requests.get("{}/api/getdecision/?id={}".format(host, int(number)))
     client_info = pd.DataFrame.from_dict(response.json())                        
 
 col1, col2 = st.columns([20, 20])
