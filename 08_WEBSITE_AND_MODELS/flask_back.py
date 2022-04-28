@@ -7,7 +7,7 @@ import sys
 import joblib
 from flask import Flask, request, jsonify
 
-app = Flask(__name__, template_folder=r'..\07_TEMPLATES')
+app = Flask(__name__)
 
 sys.path.insert(0, r'..\06_MODEL')
 sys.path.insert(0, r'..\07_TEMPLATES')
@@ -73,4 +73,4 @@ def decision():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True)
