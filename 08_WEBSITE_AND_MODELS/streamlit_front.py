@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-host = 'http://127.0.0.1:5000'
+host = 'https://34.228.161.133:5000'
 try:
     response = requests.get("{}/load_data".format(host))
 except requests.exceptions.ConnectionError:
