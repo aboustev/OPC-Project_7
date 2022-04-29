@@ -11,3 +11,4 @@ flask
 plotly
 streamlit
 streamlit-option-menu
+click==8.0

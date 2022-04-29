@@ -18,13 +18,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-host = 'https://34.228.161.133:5000'
-try:
-    response = requests.get("{}/load_data".format(host))
-except requests.exceptions.ConnectionError:
-    host = 'https://share.streamlit.io/aboustev/opc-project_7/main/08_WEBSITE_AND_MODELS/flask_back.py'
-    response = requests.get("{}/load_data".format(host))
+host = 'https://127.0.0.1:5000'
+#host = 'https://34.228.161.133:5000'
+#host = 'https://share.streamlit.io/aboustev/opc-project_7/main/08_WEBSITE_AND_MODELS/flask_back.py'
+response = requests.get("{}/load_data".format(host))
 
 df_grant_desc, df_all_desc, all_data = response.json()
 df_grant_desc = pd.read_json(df_grant_desc)
