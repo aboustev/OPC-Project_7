@@ -20,13 +20,13 @@ st.set_page_config(
 )
 
 try:
-    host = "54.205.25.37:8080"
+    host = "http://54.205.25.37:8080"
     response = requests.get("{}/load_data".format(host))
 except Exception as e:
     st.write(e)
     host_txt = st.text_input('Host', value='127.0.0.1')
     port = st.number_input('Port', value=5000)
-    host = "{}:{}".format(host_txt, port)
+    host = "http://{}:{}".format(host_txt, port)
     st.write(host)
     try:
         response = requests.get("{}/load_data".format(host))
