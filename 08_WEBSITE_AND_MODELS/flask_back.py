@@ -13,6 +13,11 @@ sys.path.insert(0, r'..\06_MODEL')
 sys.path.insert(0, r'..\07_TEMPLATES')
 
 
+@app.route('/')
+def main_page():
+    return '<h1>Main page of Flask app</h1>'
+
+
 @app.route('/load_data')
 def frontpage():
     try:
