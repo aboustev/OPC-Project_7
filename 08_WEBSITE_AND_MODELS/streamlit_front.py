@@ -21,7 +21,7 @@ st.set_page_config(
 
 try:
     host = "http://54.205.25.37:8080"
-    response = requests.get("{}/load_data".format(host))
+    response = requests.get("{}/api/load_data/".format(host))
 except Exception as e:
     st.write(e)
     host_txt = st.text_input('Host', value='127.0.0.1')
@@ -29,7 +29,7 @@ except Exception as e:
     host = "http://{}:{}".format(host_txt, port)
     st.write(host)
     try:
-        response = requests.get("{}/load_data".format(host))
+        response = requests.get("{}/api/load_data/".format(host))
     except Exception as e:
         st.write(e)
         response = None

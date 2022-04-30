@@ -18,7 +18,7 @@ def main_page():
     return '<h1>Main page of Flask app</h1>'
 
 
-@app.route('/load_data')
+@app.route('/api/load_data/')
 def frontpage():
     try:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
