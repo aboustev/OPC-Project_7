@@ -26,6 +26,7 @@ try:
     response = requests.get("{}/load_data".format(host))
 except:
     host = "{}:{}".format(host_txt, port)
+    st.write(host)
     try:
         response = requests.get("{}/load_data".format(host))
     except:
