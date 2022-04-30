@@ -18,18 +18,20 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-host_txt = st.text_input('Host', value='127.0.0.1')
-port = st.number_input('Port', value=5000)
 
 try:
-    host = "127.0.0.1:5000"
+    host = "54.205.25.37:8080"
     response = requests.get("{}/load_data".format(host))
-except:
+except Exception as e:
+    st.write(e)
+    host_txt = st.text_input('Host', value='127.0.0.1')
+    port = st.number_input('Port', value=5000)
     host = "{}:{}".format(host_txt, port)
     st.write(host)
     try:
         response = requests.get("{}/load_data".format(host))
-    except:
+    except Exception as e:
+        st.write(e)
         response = None
 
 if response:
