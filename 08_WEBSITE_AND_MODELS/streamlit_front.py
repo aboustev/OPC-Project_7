@@ -22,9 +22,7 @@ st.set_page_config(
 
 try:
     host = "http://54.205.25.37:8080"
-    response1 = requests.get("{}/api/load_gd_data/".format(host))
-    response2 = requests.get("{}/api/load_ad_data/".format(host))
-    response3 = requests.get("{}/api/load_all_data/".format(host))
+    response = requests.get("{}/api/load_data/".format(host))
 except Exception as e:
     st.write(e)
     host_txt = st.text_input('Host', value='127.0.0.1')
@@ -32,18 +30,19 @@ except Exception as e:
     host = "http://{}:{}".format(host_txt, port)
     st.write(host)
     try:
-        response1 = requests.get("{}/api/load_gd_data/".format(host))
-        response2 = requests.get("{}/api/load_ad_data/".format(host))
-        response3 = requests.get("{}/api/load_all_data/".format(host))
+        response = requests.get("{}/api/load_data/".format(host))
     except Exception as e:
         st.write(e)
-        response1 = None
-        response2 = None
-        response3 = None
+        response = None
 
-if response1 and response2 and response3:
-    response = [response1.json(), response2.json(), gzip.decompress(response3.json())]
-    df_grant_desc, df_all_desc, all_data = response
+if response:
+    try:
+        all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
+    except FileNotFoundError:
+        all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
+
+    all_data = all_data[all_data['TARGET'].notna()].reset_index(drop=True)
+    df_grant_desc, df_all_desc = response.json()
     df_grant_desc = pd.read_json(df_grant_desc)
     df_all_desc = pd.read_json(df_all_desc)
     all_data = pd.read_json(all_data)

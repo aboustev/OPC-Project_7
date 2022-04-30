@@ -6,7 +6,7 @@ import numpy as np
 import sys
 import joblib
 import gzip
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -19,8 +19,8 @@ def main_page():
     return '<h1>Main page of Flask app</h1>'
 
 
-@app.route('/api/load_gd_data/')
-def data_loading_1():
+@app.route('/api/load_data/')
+def frontpage():
     try:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
     except FileNotFoundError:
@@ -29,46 +29,16 @@ def data_loading_1():
     data_granted_loan = all_data[all_data.TARGET.values == 1]
     columns = [col for col in all_data.columns if col != "TARGET"]
     granted_described = data_granted_loan[columns].describe()
-
-    gd_json = granted_described.to_json(
-        orient='columns',
-        index=True
-    )
-
-    return gd_json
-
-
-@app.route('/api/load_ad_data/')
-def data_loading_2():
-    try:
-        all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
-    except FileNotFoundError:
-        all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-
-    columns = [col for col in all_data.columns if col != "TARGET"]
     all_described = all_data[columns].describe()
 
-    ad_json = all_described.to_json(
+    jsonified_list = jsonify([granted_described.to_json(
         orient='columns',
         index=True
-    )
-    return ad_json
-
-
-@app.route('/api/load_all_data/')
-def data_loading_3():
-    try:
-        all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
-    except FileNotFoundError:
-        all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-
-    all_data = all_data[all_data['TARGET'].notna()].reset_index(drop=True)
-    all_data_json = all_data.to_json(
+    ), all_described.to_json(
         orient='columns',
         index=True
-    )
-    compressed = gzip.compress(all_data_json.encode('utf-8'))
-    return compressed
+    )])
+    return jsonified_list
 
 
 @app.route('/api/getdecision/', methods=['GET'])
