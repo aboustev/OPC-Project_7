@@ -40,12 +40,11 @@ if response:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
     except FileNotFoundError:
         all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-
     all_data = all_data[all_data['TARGET'].notna()].reset_index(drop=True)
+    
     df_grant_desc, df_all_desc = response.json()
     df_grant_desc = pd.read_json(df_grant_desc)
     df_all_desc = pd.read_json(df_all_desc)
-    all_data = pd.read_json(all_data)
     all_columns = df_all_desc.columns
 
     selected = option_menu(None, ["Client loan status", "Detailed", "Semi-detailed", 'Custom simulation'],
