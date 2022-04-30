@@ -6,6 +6,7 @@ from json import JSONDecodeError
 import streamlit as st
 import pandas as pd
 import requests
+import gzip
 from streamlit_option_menu import option_menu
 from page_0 import loan_status_page_front
 from page_1 import detailed_page_front
@@ -21,7 +22,9 @@ st.set_page_config(
 
 try:
     host = "http://54.205.25.37:8080"
-    response = requests.get("{}/api/load_data/".format(host))
+    response1 = requests.get("{}/api/load_gd_data/".format(host))
+    response2 = requests.get("{}/api/load_ad_data/".format(host))
+    response3 = requests.get("{}/api/load_all_data/".format(host))
 except Exception as e:
     st.write(e)
     host_txt = st.text_input('Host', value='127.0.0.1')
@@ -29,13 +32,18 @@ except Exception as e:
     host = "http://{}:{}".format(host_txt, port)
     st.write(host)
     try:
-        response = requests.get("{}/api/load_data/".format(host))
+        response1 = requests.get("{}/api/load_gd_data/".format(host))
+        response2 = requests.get("{}/api/load_ad_data/".format(host))
+        response3 = requests.get("{}/api/load_all_data/".format(host))
     except Exception as e:
         st.write(e)
-        response = None
+        response1 = None
+        response2 = None
+        response3 = None
 
-if response:
-    df_grant_desc, df_all_desc, all_data = response.json()
+if response1 and response2 and response3:
+    response = [response1.json(), response2.json(), gzip.decompress(response3.json())]
+    df_grant_desc, df_all_desc, all_data = response
     df_grant_desc = pd.read_json(df_grant_desc)
     df_all_desc = pd.read_json(df_all_desc)
     all_data = pd.read_json(all_data)
