@@ -20,22 +20,27 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+container1 = st.empty()
+container2 = st.empty()
 try:
     host = "http://54.205.25.37:8080"
     response = requests.get("{}/api/load_data/".format(host))
 except Exception as e:
-    st.write(e)
-    host_txt = st.text_input('Host', value='127.0.0.1')
-    port = st.number_input('Port', value=5000)
-    host = "http://{}:{}".format(host_txt, port)
-    st.write(host)
     try:
+        host = "http://127.0.0.1:8080"
         response = requests.get("{}/api/load_data/".format(host))
     except Exception as e:
-        st.write(e)
-        response = None
+        host_txt = container1.text_input('Host', value='127.0.0.1')
+        port = container2.number_input('Port', value=8080)
+        host = "http://{}:{}".format(host_txt, port)
+        try:
+            response = requests.get("{}/api/load_data/".format(host))
+        except Exception as e:
+            response = None
 
 if response:
+    container1.empty()
+    container2.empty()
     try:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
     except FileNotFoundError:
