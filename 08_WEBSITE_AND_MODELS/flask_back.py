@@ -43,14 +43,17 @@ def frontpage():
 
 @app.route('/api/getdecision/', methods=['GET'])
 def decision():
+    print('*')
     try:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
     except FileNotFoundError:
         all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
 
+    print('**')
     cls = joblib.load('final_model.sav')
     imp = joblib.load('knn_inputer.sav')
 
+    print('***')
     args = request.args
     id_client = int(args.get('id'))
     all_data['TARGET_PROBA'] = np.nan
