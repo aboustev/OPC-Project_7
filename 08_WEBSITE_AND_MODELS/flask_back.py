@@ -8,7 +8,6 @@ from flask import Flask, request, jsonify
 import os
 
 main_p = os.getcwd()
-print(os.path.join(main_p, '06_MODEL'))
 app = Flask(__name__)
 
 all_data = pd.read_csv(os.path.join(main_p, '06_MODEL', 'all_data.csv'))

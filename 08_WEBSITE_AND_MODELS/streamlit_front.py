@@ -6,7 +6,6 @@ from json import JSONDecodeError
 import streamlit as st
 import pandas as pd
 import requests
-import gzip
 from streamlit_option_menu import option_menu
 from page_0 import loan_status_page_front
 from page_1 import detailed_page_front
@@ -22,21 +21,11 @@ st.set_page_config(
 
 container1 = st.empty()
 container2 = st.empty()
+host = "https://flask-back-app.herokuapp.com/"
 try:
-    host = "http://54.205.25.37:8080"
     response = requests.get("{}/api/load_data/".format(host))
 except Exception as e:
-    try:
-        host = "http://127.0.0.1:8080"
-        response = requests.get("{}/api/load_data/".format(host))
-    except Exception as e:
-        host_txt = container1.text_input('Host', value='127.0.0.1')
-        port = container2.number_input('Port', value=8080)
-        host = "http://{}:{}".format(host_txt, port)
-        try:
-            response = requests.get("{}/api/load_data/".format(host))
-        except Exception as e:
-            response = None
+    response = None
 
 if response:
     container1.empty()
