@@ -5,13 +5,11 @@ import pandas as pd
 import numpy as np
 import sys
 import joblib
-import gzip
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 sys.path.insert(0, r'..\06_MODEL')
-sys.path.insert(0, r'..\07_TEMPLATES')
 
 
 @app.route('/')
@@ -43,17 +41,14 @@ def frontpage():
 
 @app.route('/api/getdecision/', methods=['GET'])
 def decision():
-    print('*')
     try:
         all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
     except FileNotFoundError:
         all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
 
-    print('**')
-    cls = joblib.load('final_model.sav')
-    imp = joblib.load('knn_inputer.sav')
+    cls = joblib.load(r'..\06_model\final_model.sav')
+    imp = joblib.load(r'..\06_model\knn_inputer.sav')
 
-    print('***')
     args = request.args
     id_client = int(args.get('id'))
     all_data['TARGET_PROBA'] = np.nan
