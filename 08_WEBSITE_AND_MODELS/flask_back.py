@@ -6,13 +6,14 @@ import numpy as np
 import sys
 import joblib
 from flask import Flask, request, jsonify
-import logging
 
 app = Flask(__name__)
 
 sys.path.insert(0, r'..\06_MODEL')
-app.logger.addHandler(logging.StreamHandler(sys.stdout))
-app.logger.setLevel(logging.ERROR)
+all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
+cls = joblib.load(r'..\06_model\final_model.sav')
+imp = joblib.load(r'..\06_model\knn_inputer.sav')
+
 
 @app.route('/')
 def main_page():
@@ -21,11 +22,6 @@ def main_page():
 
 @app.route('/api/load_data/')
 def frontpage():
-    try:
-        all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
-    except FileNotFoundError:
-        all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-
     data_granted_loan = all_data[all_data.TARGET.values == 1]
     columns = [col for col in all_data.columns if col != "TARGET"]
     granted_described = data_granted_loan[columns].describe()
@@ -43,14 +39,6 @@ def frontpage():
 
 @app.route('/api/getdecision/', methods=['GET'])
 def decision():
-    try:
-        all_data = pd.read_csv(r'..\06_MODEL\all_data.csv')
-    except FileNotFoundError:
-        all_data = pd.read_csv('https://github.com/aboustev/OPC-Project_7/blob/main/06_MODEL/all_data.csv?raw=true')
-
-    cls = joblib.load(r'..\06_model\final_model.sav')
-    imp = joblib.load(r'..\06_model\knn_inputer.sav')
-
     args = request.args
     id_client = int(args.get('id'))
     all_data['TARGET_PROBA'] = np.nan
