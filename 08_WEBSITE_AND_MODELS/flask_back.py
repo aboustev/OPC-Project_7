@@ -6,11 +6,13 @@ import numpy as np
 import sys
 import joblib
 from flask import Flask, request, jsonify
+import logging
 
 app = Flask(__name__)
 
 sys.path.insert(0, r'..\06_MODEL')
-
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.ERROR)
 
 @app.route('/')
 def main_page():
