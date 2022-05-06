@@ -7,13 +7,13 @@ import joblib
 from flask import Flask, request, jsonify
 import os
 
-print(os.getcwd())
+main_p = os.getcwd()
+print(os.path.join(main_p, '06_MODEL'))
 app = Flask(__name__)
 
-print('*')
-all_data = pd.read_csv(r'.\06_MODEL\all_data.csv')
-cls = joblib.load(r'.\06_model\final_model.sav')
-imp = joblib.load(r'.\06_model\knn_inputer.sav')
+all_data = pd.read_csv(os.path.join(main_p, '06_MODEL', 'all_data.csv'))
+cls = joblib.load(os.path.join(main_p, '06_MODEL', 'final_model.sav'))
+imp = joblib.load(os.path.join(main_p, '06_MODEL', 'knn_inputer.sav'))
 
 
 @app.route('/')
