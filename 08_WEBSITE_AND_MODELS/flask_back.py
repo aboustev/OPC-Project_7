@@ -10,9 +10,10 @@ import os
 print(os.getcwd())
 app = Flask(__name__)
 
-all_data = pd.read_csv(r'06_MODEL\all_data.csv')
-cls = joblib.load(r'06_model\final_model.sav')
-imp = joblib.load(r'06_model\knn_inputer.sav')
+print('*')
+all_data = pd.read_csv(r'.\06_MODEL\all_data.csv')
+cls = joblib.load(r'.\06_model\final_model.sav')
+imp = joblib.load(r'.\06_model\knn_inputer.sav')
 
 
 @app.route('/')
