@@ -3,7 +3,7 @@ You will find, here, the links to the api and the website.
 
 api : [api link](https://flask-back-app.herokuapp.com/)
 
-website : [Dashboard link](54.205.25.37:8501)
+website : [Dashboard link](http://54.205.25.37:8501/)
 
 git : [git link](https://github.com/aboustev/OPC-Project_7)
 
