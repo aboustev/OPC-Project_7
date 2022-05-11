@@ -17,7 +17,9 @@ imp = joblib.load(os.path.join(main_p, '06_MODEL', 'knn_inputer.sav'))
 
 @app.route('/')
 def main_page():
-    return '<h1>Main page of Flask app</h1>'
+    return '<h1>Main page of Flask app</h1><br> \
+        <h2>Here is the command to load data : /api/load_data</h2><br> \
+        <h2>To load a client data use : /api/getdecision/id= [client id]</h2>'
 
 
 @app.route('/api/load_data/')
