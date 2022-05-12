@@ -22,10 +22,10 @@ Then it loads the informations about the first client and launches api/getdecisi
 
 - On the bash :
 
-'''bash
+```bash
 $ cd OPC-Project_7/08_WEBSITE_AND_MODELS
 $ sudo nohup streamlit run streamlit_front.py > log.txt 2>&1 &
-'''
+```
 
 - Check the [Website](54.205.25.37:8501)
 
